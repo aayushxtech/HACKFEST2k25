@@ -77,7 +77,7 @@ export default function TabOneScreen() {
             />
             <ThemedView style={styles.cardContent}>
               <Ionicons name="location-outline" size={32} color="#4A90E2" />
-              <ThemedText style={styles.cardTitle}>City Events</ThemedText>
+              <ThemedText style={styles.cardTitle}>Servics</ThemedText>
               <ThemedText style={styles.cardSubtext}>
                 Discover local initiatives
               </ThemedText>

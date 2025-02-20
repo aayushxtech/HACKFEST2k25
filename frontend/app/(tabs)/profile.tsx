@@ -46,8 +46,8 @@ const getScoreColor = (score: number): string => {
 const ProfileScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [userDetails, setUserDetails] = useState<UserDetails>({
-    name: "John Doe",
-    email: "john@example.com",
+    name: "Mahesh Babu",
+    email: "mahesh@gmail.com",
     bio: "Software Developer | Event Enthusiast",
     profilePicture: "https://via.placeholder.com/150", // Fixed URL
   });
@@ -76,12 +76,12 @@ const ProfileScreen = () => {
   });
 
   const [leaderboardData] = useState<LeaderboardEntry[]>([
-    { rank: 1, name: "Alex Chen", score: 980 },
-    { rank: 2, name: "Sarah Kim", score: 925 },
-    { rank: 3, name: "Mike Ross", score: 890 },
-    { rank: 4, name: "John Smith", score: 870 },
-    { rank: 5, name: "Current User", score: 850 },
-    { rank: 6, name: "Emma Wilson", score: 840 },
+    { rank: 1, name: "Rohan Sharma", score: 980 },
+    { rank: 2, name: "Ram Prakash", score: 925 },
+    { rank: 3, name: "Prathik Jain", score: 890 },
+    { rank: 4, name: "Anumita Menon", score: 870 },
+    { rank: 5, name: "Manikandan", score: 850 },
+    { rank: 6, name: "Pavitra", score: 840 },
   ]);
 
   const pickImage = async () => {

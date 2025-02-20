@@ -35,7 +35,7 @@ const CARDS: CardItem[] = [
   },
   {
     id: 'city',
-    title: 'City Services',
+    title: 'City',
     subtitle: 'Discover local initiatives',
     icon: 'location-outline',
     image: require("../../assets/images/city.jpg")
@@ -48,9 +48,9 @@ const CARDS: CardItem[] = [
     image: require("../../assets/images/donations.jpg")
   },
   {
-    id: 'events',
-    title: 'Events',
-    subtitle: 'Plan your schedule',
+    id: 'services',
+    title: 'Services',
+    subtitle: 'Find local services',
     icon: 'calendar-outline',
     image: require("../../assets/images/upcoming.jpg")
   }

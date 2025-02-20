@@ -164,32 +164,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F0F8FF",
+    paddingTop: Platform.OS === 'ios' ? 35 : 10, // Reduced top padding
   },
   header: {
-    padding: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 16,
     backgroundColor: "#2874A6",
-    borderBottomRightRadius: 30,
-    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    marginTop: 20, // Added top margin
+    marginBottom: 12, // Adjusted bottom margin
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
       },
       android: {
-        elevation: 5,
+        elevation: 3,
       },
     }),
   },
   headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 24, // Reduced from 28
+    fontWeight: "700", // Changed from "bold"
     color: "white",
     textAlign: "center",
+    letterSpacing: 0.5, // Added letter spacing
   },
   scrollView: {
-    padding: 15,
+    padding: 12, // Changed from 15
   },
   cardContainer: {
     backgroundColor: "white",

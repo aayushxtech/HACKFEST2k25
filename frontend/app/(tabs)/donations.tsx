@@ -99,16 +99,6 @@ const DonationScreen = () => {
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity
-            style={styles.profileButton}
-            onPress={() => router.push("/(tabs)/profile")}
-          >
-            <Ionicons
-              name="person-circle"
-              size={24 * scaleFactor}
-              color="#fff"
-            />
-          </TouchableOpacity>
           <Text numberOfLines={1} style={styles.headerTitle}>
             Donations
           </Text>
@@ -120,6 +110,7 @@ const DonationScreen = () => {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.filterContainer}
+        contentContainerStyle={styles.filterContentContainer}
       >
         {filterTypes.map((type) => (
           <TouchableOpacity
@@ -206,52 +197,89 @@ const { width } = Dimensions.get("window");
 const scaleFactor = width / 375;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F0F7FF" },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#F0F8FF",
+    paddingTop: Platform.OS === 'ios' ? 35 : 10, // Updated to match community
+  },
   header: {
-    backgroundColor: "#4A90E2",
-    height: Platform.OS === "ios" ? 90 : 70,
-    justifyContent: "flex-end",
-    paddingBottom: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 16,
+    backgroundColor: "#2874A6",
+    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    marginTop: 20,
+    marginBottom: 12,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
-        shadowRadius: 4,
+        shadowRadius: 2,
       },
       android: {
-        elevation: 4,
+        elevation: 3,
       },
     }),
   },
   headerContent: {
-    flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16 * scaleFactor,
-  },
-  profileButton: {
-    padding: 8 * scaleFactor,
-    marginRight: 12 * scaleFactor,
+    justifyContent: "center",
   },
   headerTitle: {
-    fontSize: 20 * scaleFactor,
-    fontWeight: "600",
+    fontSize: 24,
+    fontWeight: "700",
     color: "#fff",
-    flex: 1,
+    textAlign: "center",
+    letterSpacing: 0.5,
   },
-  filterContainer: { padding: 15 * scaleFactor },
+  filterContainer: { 
+    paddingVertical: 16, // Increased from 12
+    paddingHorizontal: 16,
+    marginBottom: 12, // Increased from 8
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderTopWidth: 1, // Added top border
+    borderTopColor: 'rgba(0,0,0,0.05)', // Added top border color
+  },
+  filterContentContainer: {
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    justifyContent: 'flex-start', // Changed from center to allow natural spacing
+    alignItems: 'center',
+    minWidth: '100%',
+  },
   filterButton: {
-    paddingHorizontal: 20 * scaleFactor,
-    paddingVertical: 10 * scaleFactor,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
     backgroundColor: "#fff",
-    marginRight: 10 * scaleFactor,
-    minWidth: 80,
+    marginRight: 8,
+    width: 95, // Increased from 90 to accommodate longer text
+    height: 36, // Slightly reduced from 38
     alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    // Remove all shadow and elevation properties
   },
-  filterButtonActive: { backgroundColor: "#4A90E2" },
-  filterText: { color: "#4A90E2", fontWeight: "600" },
-  filterTextActive: { color: "#fff" },
+  filterButtonActive: { 
+    backgroundColor: "#2874A6",
+    borderColor: "#2874A6",
+    // Only color changes, no other properties
+  },
+  filterText: { 
+    color: "#64748B", 
+    fontWeight: "500",
+    fontSize: 12, // Reduced from 13
+    letterSpacing: 0,  // Removed letter spacing
+  },
+  filterTextActive: { 
+    color: "#fff",
+    // Only color change, keep same weight as inactive
+    fontWeight: "500",
+  },
   cardsContainer: { padding: 15 * scaleFactor },
   card: {
     backgroundColor: "#fff",

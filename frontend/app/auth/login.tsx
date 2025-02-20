@@ -49,7 +49,7 @@ export default function Login() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.paper}>
-        <Text style={styles.title}>Sign In</Text>
+        <Text style={styles.title}>Login Page </Text>
         <View style={styles.form}>
           <TextInput
             style={styles.input}
@@ -80,7 +80,7 @@ export default function Login() {
             {isLoading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text style={styles.buttonText}>Sign In</Text>
+              <Text style={styles.buttonText}>Login</Text>
             )}
           </TouchableOpacity>
           <View style={styles.footer}>
@@ -100,67 +100,82 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EBF5FB",
+    backgroundColor: "#F0F7FF",  // Lighter blue background
     justifyContent: "center",
     alignItems: "center",
   },
   paper: {
     backgroundColor: "white",
-    padding: 20,
-    borderRadius: 8,
+    padding: 24,
+    borderRadius: 16,
     width: "85%",
     maxWidth: 400,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowColor: "#4A90E2",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   title: {
-    fontSize: 24,
-    color: "#2874A6",
+    fontSize: 28,
+    color: "#2E3E5C",  // Deep blue
+    fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
   },
   form: {
     width: "100%",
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 4,
-    padding: 12,
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    padding: 15,
     marginBottom: 16,
+    fontSize: 16,
+    color: "#2E3E5C",
   },
   button: {
-    backgroundColor: "#2874A6",
-    padding: 15,
-    borderRadius: 4,
-    marginTop: 10,
+    backgroundColor: "#4A90E2",  // Bright blue
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 16,
+    shadowColor: "#4A90E2",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonText: {
     color: "white",
     textAlign: "center",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "600",
+    letterSpacing: 0.5,
   },
   buttonDisabled: {
-    backgroundColor: "#A9CCE3",
+    backgroundColor: "#B8D2F2",
   },
   footer: {
-    marginTop: 20,
+    marginTop: 24,
     alignItems: "center",
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
   },
   footerText: {
-    color: "#666",
-    fontSize: 14,
+    color: "#64748B",  // Slate
+    fontSize: 15,
   },
   link: {
-    color: "#2874A6",
-    fontWeight: "bold",
+    color: "#4A90E2",
+    fontWeight: "600",
   },
   errorText: {
-    color: "red",
-    marginBottom: 16,
+    color: "#EF4444",  // Red
+    marginBottom: 12,
+    fontSize: 13,
+    marginLeft: 4,
   },
 });

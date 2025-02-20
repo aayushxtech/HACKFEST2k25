@@ -1,5 +1,4 @@
 import {
-  Animated,
   Image,
   StyleSheet,
   TouchableOpacity,
@@ -8,186 +7,281 @@ import {
   Platform,
   Dimensions,
   SafeAreaView,
+  useWindowDimensions,
+  ActivityIndicator,
 } from "react-native";
 import { Link, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { useState } from "react";
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
-const { width } = Dimensions.get("window");
-const standardWidth = 375; // iPhone X width as base
-const scaleFactor = width / standardWidth;
+interface CardItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+  image: any;
+}
+
+const CARDS: CardItem[] = [
+  {
+    id: 'community',
+    title: 'Community',
+    subtitle: 'Connect with volunteers',
+    icon: 'people-outline',
+    image: require("../../assets/images/community.jpg")
+  },
+  {
+    id: 'city',
+    title: 'City Services',
+    subtitle: 'Discover local initiatives',
+    icon: 'location-outline',
+    image: require("../../assets/images/city.jpg")
+  },
+  {
+    id: 'donations',
+    title: 'Donations',
+    subtitle: 'Make a difference',
+    icon: 'gift-outline',
+    image: require("../../assets/images/donations.jpg")
+  },
+  {
+    id: 'events',
+    title: 'Events',
+    subtitle: 'Plan your schedule',
+    icon: 'calendar-outline',
+    image: require("../../assets/images/upcoming.jpg")
+  }
+];
 
 export default function TabOneScreen() {
-  const handleNavigateToCommunity = () => {
-    router.push("/(tabs)/community");
+  const { width } = useWindowDimensions();
+  const isSmallDevice = width < 375;
+  const padding = isSmallDevice ? 16 : 24;
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleNavigate = (route: string) => {
+    try {
+      setIsLoading(true);
+      router.push(`/(tabs)/${route}`);
+    } catch (err) {
+      console.error('Navigation error:', err);
+      setError('Navigation failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  return (
-    <ScrollView style={styles.container}>
-      <ThemedView style={styles.header}>
-        <ThemedView style={styles.greeting}>
-          <ThemedText style={styles.greetingText}>Hi, John! 👋</ThemedText>
-        </ThemedView>
-        <TouchableOpacity style={styles.profileButton}>
-          <Ionicons name="person-circle-outline" size={32} color="#4A90E2" />
-        </TouchableOpacity>
-      </ThemedView>
-
-      <ScrollView contentContainerStyle={styles.cardsContainer}>
-        <View style={styles.cardGrid}>
-          {/* Community Card with navigation */}
-          <TouchableOpacity
-            style={styles.card}
-            onPress={handleNavigateToCommunity}
+  if (error) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.errorContainer}>
+          <ThemedText style={styles.errorText}>{error}</ThemedText>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => setError(null)}
           >
-            <Image
-              source={require("../../assets/images/community.jpg")}
-              style={styles.cardImage}
-            />
-            <ThemedView style={styles.cardContent}>
-              <Ionicons name="people-outline" size={32} color="#4A90E2" />
-              <ThemedText style={styles.cardTitle}>Community</ThemedText>
-              <ThemedText style={styles.cardSubtext}>
-                Connect with volunteers
-              </ThemedText>
-            </ThemedView>
-          </TouchableOpacity>
-
-          {/* Donations Card */}
-          <TouchableOpacity style={styles.card}>
-            <Image
-              source={require("../../assets/images/donations.jpg")}
-              style={styles.cardImage}
-            />
-            <ThemedView style={styles.cardContent}>
-              <Ionicons name="gift-outline" size={32} color="#4A90E2" />
-              <ThemedText style={styles.cardTitle}>Donations</ThemedText>
-              <ThemedText style={styles.cardSubtext}>
-                Make a difference
-              </ThemedText>
-            </ThemedView>
-          </TouchableOpacity>
-
-          {/* City Events Card */}
-          <TouchableOpacity style={styles.card}>
-            <Image
-              source={require("../../assets/images/city.jpg")}
-              style={styles.cardImage}
-            />
-            <ThemedView style={styles.cardContent}>
-              <Ionicons name="location-outline" size={32} color="#4A90E2" />
-              <ThemedText style={styles.cardTitle}>Servics</ThemedText>
-              <ThemedText style={styles.cardSubtext}>
-                Discover local initiatives
-              </ThemedText>
-            </ThemedView>
-          </TouchableOpacity>
-
-          {/* Upcoming Events Card */}
-          <TouchableOpacity style={styles.card}>
-            <Image
-              source={require("../../assets/images/upcoming.jpg")}
-              style={styles.cardImage}
-            />
-            <ThemedView style={styles.cardContent}>
-              <Ionicons name="calendar-outline" size={32} color="#4A90E2" />
-              <ThemedText style={styles.cardTitle}>Upcoming Events</ThemedText>
-              <ThemedText style={styles.cardSubtext}>
-                Plan your schedule
-              </ThemedText>
-            </ThemedView>
+            <ThemedText style={styles.retryText}>Retry</ThemedText>
           </TouchableOpacity>
         </View>
-      </ScrollView>
-    </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      )}
+      <View style={styles.mainContainer}>
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.scrollContent, 
+            { padding }
+          ]}
+        >
+          <View style={styles.headerContainer}>
+            <ThemedText style={styles.welcomeText}>
+              Welcome Back 👋
+            </ThemedText>
+            <ThemedText style={styles.subtitleText}>
+              Explore services in your area
+            </ThemedText>
+          </View>
+
+          <View style={styles.cardGrid}>
+            {CARDS.map((item) => (
+              <Animated.View
+                key={item.id}
+                entering={FadeInDown.delay(200)}
+                style={styles.card}
+              >
+                <TouchableOpacity
+                  onPress={() => handleNavigate(item.id)}
+                  style={styles.cardTouchable}
+                >
+                  <View style={styles.imageContainer}>
+                    <Image
+                      source={item.image}
+                      style={styles.cardImage}
+                    />
+                    <View style={styles.cardOverlay} />
+                  </View>
+                  <View style={styles.cardContent}>
+                    <View style={styles.iconContainer}>
+                      <Ionicons 
+                        name={item.icon as any} 
+                        size={20} // Changed from 28 to 24
+                        color="#1A365D" 
+                      />
+                    </View>
+                    <View style={styles.textContainer}>
+                      <ThemedText style={styles.cardTitle}>
+                        {item.title}
+                      </ThemedText>
+                      <ThemedText style={styles.cardSubtext}>
+                        {item.subtitle}
+                      </ThemedText>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </Animated.View>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: "#F0F7FF",
+    backgroundColor: "#F8F9FA",
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16 * scaleFactor,
-    paddingTop: Platform.OS === "ios" ? 48 * scaleFactor : 16 * scaleFactor,
-    backgroundColor: "white",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#E2E8F0",
-    width: "100%",
-  },
-  greeting: {
+  mainContainer: {
     flex: 1,
-    backgroundColor: "white",
-    paddingVertical: 4 * scaleFactor,
   },
-  greetingText: {
-    fontSize: Math.min(24 * scaleFactor, 32),
-    fontWeight: "600",
-    color: "#2E3E5C",
-    backgroundColor: "transparent",
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 32,
   },
-  profileButton: {
-    padding: 8 * scaleFactor,
-    backgroundColor: "transparent",
+  headerContainer: {
+    marginTop: 20,
+    marginBottom: 32,
+    paddingHorizontal: 4,
   },
-  cardsContainer: {
-    padding: 16 * scaleFactor,
-    paddingBottom: 32 * scaleFactor,
+  welcomeText: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#1A365D",
+    marginBottom: 12,
+    letterSpacing: 0.5,
+    lineHeight: 40,
+  },
+  subtitleText: {
+    fontSize: 16,
+    color: "#4A5568",
+    fontWeight: "500",
   },
   cardGrid: {
-    flexDirection: "column",
-    gap: 16 * scaleFactor,
+    gap: 20,
   },
   card: {
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 16 * scaleFactor,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#4A90E2",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-    width: "100%",
-    marginBottom: 16 * scaleFactor,
-    minHeight: Math.min(160 * scaleFactor, 200),
-    overflow: "hidden",
+    overflow: 'hidden',
+    elevation: 8,
+    shadowColor: "#4A90E2",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    height: 180,
   },
-  cardContent: {
-    alignItems: "center",
-    marginVertical: 8 * scaleFactor,
-    backgroundColor: "white", // Add explicit background color
-    width: "100%",
-    paddingHorizontal: 8 * scaleFactor,
-    paddingVertical: 12 * scaleFactor,
+  cardTouchable: {
+    flex: 1,
+    flexDirection: 'row',
   },
-  cardTitle: {
-    fontSize: Math.min(22 * scaleFactor, 28),
-    fontWeight: "700",
-    color: "#2E3E5C",
-    marginTop: 8 * scaleFactor,
-    marginBottom: 4 * scaleFactor,
-  },
-  cardSubtext: {
-    fontSize: Math.min(16 * scaleFactor, 20),
-    color: "#64748B",
-    textAlign: "center",
-    lineHeight: 24 * scaleFactor,
+  imageContainer: {
+    width: '40%',
+    overflow: 'hidden',
   },
   cardImage: {
-    width: "100%",
-    height: Math.min(120 * scaleFactor, 150),
-    resizeMode: "cover",
-    marginBottom: 8 * scaleFactor, // Add space between image and content
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  cardContent: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  iconContainer: {
+    width: 48, // Changed from 48
+    height: 48, // Changed from 48
+    borderRadius: 24, // Changed from 24
+    backgroundColor: '#F0F7FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  textContainer: {
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 18, // Changed from 20
+    fontWeight: "700",
+    color: "#1A365D",
+    marginBottom: 4,
+    textAlign: "center",
+  },
+  cardSubtext: {
+    fontSize: 12, // Changed from 14
+    color: "#4A5568",
+    textAlign: "center",
+    fontWeight: "500",
+    lineHeight: 16, // Changed from 20
+  },
+  cardOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.1)",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#DC2626',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });

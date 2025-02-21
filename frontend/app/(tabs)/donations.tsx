@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { router } from "expo-router";
 import {
   View,
   Text,
@@ -94,6 +95,17 @@ const DonationScreen = () => {
     return "#4CAF50";
   };
 
+  const handleDonatePress = (item: DonationCard) => {
+    router.push({
+      pathname: "/components/donatenow",
+      params: {
+        donationId: item.id,
+        donationType: item.type,
+        donationName: item.name,
+      },
+    });
+  };
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -179,7 +191,10 @@ const DonationScreen = () => {
                 </View>
               </View>
 
-              <TouchableOpacity style={styles.donateButton}>
+              <TouchableOpacity 
+                style={styles.donateButton}
+                onPress={() => handleDonatePress(item)}
+              >
                 <Text style={styles.donateButtonText}>Donate Now</Text>
               </TouchableOpacity>
             </View>

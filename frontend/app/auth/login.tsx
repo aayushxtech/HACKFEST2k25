@@ -74,13 +74,14 @@ export default function Login() {
 
           <View style={styles.passwordContainer}>
             <TextInput
-              style={[styles.input, { flex: 1 }]}
+              style={styles.passwordInput}
               placeholder="Password"
               secureTextEntry={!passwordVisible}
               value={password}
               onChangeText={setPassword}
             />
             <TouchableOpacity
+              style={styles.eyeIcon}
               onPress={() => setPasswordVisible(!passwordVisible)}
             >
               <Ionicons
@@ -160,14 +161,28 @@ const styles = StyleSheet.create({
     color: "#2E3E5C",
   },
   passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#F8FAFC",
+    borderColor: '#E2E8F0',
+    backgroundColor: '#F8FAFC',
     borderRadius: 12,
-    paddingHorizontal: 15,
     marginBottom: 16,
+    height: 56, // Fixed height
+    position: 'relative', // Added for proper positioning
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 15,
+    fontSize: 16,
+    color: '#2E3E5C',
+    height: '100%', // Fill container height
+  },
+  eyeIcon: {
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%', // Match container height
   },
   button: {
     backgroundColor: "#4A90E2",

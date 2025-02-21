@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { MotiView, AnimatePresence } from "moti";
 import Animated, { FadeInUp, FadeInRight } from "react-native-reanimated";
 import Skills from '@/components/Skills';
+import ProfileButton from '../components/ProfileButton';
 import { SharedElement } from 'react-navigation-shared-element';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -168,50 +169,26 @@ export default function ServicesScreen() {
   const [showChatbot, setShowChatbot] = useState(false);
   const [showSkills, setShowSkills] = useState(false);
   
+  const handleApplyPress = (job: JobListing) => {
+    router.push({
+      pathname: "/components/applynow", // Fixed capitalization
+      params: {
+        jobId: job.id,
+        jobTitle: job.jobTitle,
+        employerName: job.name,
+        salary: job.salary,
+        location: job.location,
+        contact: job.contact,
+      },
+    });
+  };
+
   return (
     <View style={styles.container}>
-      {/* Gradient Background */}
-      <LinearGradient
-        colors={['#E1F5FE', '#F0F8FF', '#FFFFFF']}
-        style={StyleSheet.absoluteFillObject}
-      />
-
-      <MotiView 
-        from={{ opacity: 0, translateY: -20 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: 'timing', duration: 800 }}
-        style={styles.header}
-      >
+      <View style={styles.header}>
         <Text style={styles.headerTitle}>Services</Text>
-        <View style={styles.headerRight}>
-          <MotiView
-            from={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'timing', duration: 600, delay: 200 }}
-          >
-            <TouchableOpacity 
-              style={styles.skillButton}
-              onPress={() => setShowSkills(true)}
-            >
-              <Ionicons name="bookmark-outline" size={20} color={iconColors.bookmark} />
-              <Text style={styles.skillButtonText}>My Skills</Text>
-            </TouchableOpacity>
-          </MotiView>
-
-          <MotiView
-            from={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'timing', duration: 600, delay: 400 }}
-          >
-            <TouchableOpacity 
-              style={styles.profileButton}
-              onPress={() => router.push("/(tabs)/profile")}
-            >
-              <Ionicons name="person-circle" size={28} color={iconColors.person} />
-            </TouchableOpacity>
-          </MotiView>
-        </View>
-      </MotiView>
+        <ProfileButton />
+      </View>
 
       <ScrollView 
         style={styles.scrollView}
@@ -253,10 +230,13 @@ export default function ServicesScreen() {
             </View>
             
             <View style={styles.cardFooter}>
-              <Text style={styles.postedDate}>{job.postedDate}</Text>
-              <TouchableOpacity style={styles.applyButton}>
+              <TouchableOpacity 
+                style={styles.applyButton}
+                onPress={() => handleApplyPress(job)} // Ensure this is called
+              >
                 <Text style={styles.applyButtonText}>Apply Now</Text>
               </TouchableOpacity>
+              <Text style={styles.postedDate}>{job.postedDate}</Text>
             </View>
           </Animated.View>
         ))}
@@ -286,58 +266,38 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#F0F8FF",
+    paddingTop: Platform.OS === "ios" ? 35 : 10,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: "#4A90E2",
-    borderBottomWidth: 0,
-    marginTop: Platform.OS === 'ios' ? 40 : 0,
+    backgroundColor: "#2874A6",
+    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    marginTop: 20,
+    marginBottom: 12,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
       },
       android: {
-        elevation: 5,
+        elevation: 3,
       },
     }),
   },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "white",
+    textAlign: "center",
     letterSpacing: 0.5,
-  },
-  skillButton: {
-    backgroundColor: "rgba(255,255,255,0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-  },
-  skillButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  profileButton: {
-    padding: 4,
   },
   scrollView: {
     flex: 1,

@@ -1,80 +1,41 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, useContext, useEffect, useState } from "react";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "../app/firebaseConfig";
 
 type AuthContextType = {
-  signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  isLoading: boolean;
+  user: User | null;
   isSignedIn: boolean;
+  isLoading: boolean;
 };
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isSignedIn: false,
+  isLoading: true,
+});
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
-    loadAuthState().catch(console.error);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setIsLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
-  async function loadAuthState() {
-    try {
-      const token = await AsyncStorage.getItem("userToken");
-      setIsSignedIn(!!token);
-    } catch (e) {
-      console.error("Auth State Load Error:", e);
-      setIsSignedIn(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      // Replace with actual API call
-      if (email && password) {
-        await AsyncStorage.setItem("userToken", "dummy-token");
-        setIsSignedIn(true);
-      }
-    } catch (e) {
-      console.error("Sign In Error:", e);
-      throw e;
-    } finally {
-      setIsLoading(false);
-    }
+  const value = {
+    user,
+    isSignedIn: !!user,
+    isLoading,
   };
 
-  const signOut = async () => {
-    try {
-      setIsLoading(true);
-      await AsyncStorage.removeItem("userToken");
-      setIsSignedIn(false);
-    } catch (e) {
-      console.error("Sign Out Error:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <AuthContext.Provider value={{ signIn, signOut, isLoading, isSignedIn }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    console.error("useAuth must be used within an AuthProvider");
-    return {
-      signIn: async () => {},
-      signOut: async () => {},
-      isLoading: false,
-      isSignedIn: false,
-    };
-  }
-  return context;
+  return useContext(AuthContext);
 };

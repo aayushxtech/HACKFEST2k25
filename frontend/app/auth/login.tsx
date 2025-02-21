@@ -9,21 +9,23 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useAuth } from "@/context/AuthContext";
 import { router, Link } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebaseConfig"; // Firebase config import
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
-  const { signIn } = useAuth();
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const validateForm = () => {
     const newErrors = { email: "", password: "" };
 
-    if (!email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email))
+    if (!email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(email.trim()))
       newErrors.email = "Invalid email format";
 
     if (!password) newErrors.password = "Password is required";
@@ -37,19 +39,26 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      await signIn(email, password);
-      router.replace("/(tabs)/community");
-    } catch (error) {
-      Alert.alert("Error", "Invalid email or password");
-    } finally {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+      if (userCredential.user) {
+        setIsLoading(false);
+        // Remove the Alert and directly navigate
+        router.replace("/(tabs)");
+      }
+    } catch (error: any) {
       setIsLoading(false);
+      Alert.alert("Login Failed", error?.message || "An error occurred");
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.paper}>
-        <Text style={styles.title}>Login Page </Text>
+        <Text style={styles.title}>Login</Text>
         <View style={styles.form}>
           <TextInput
             style={styles.input}
@@ -62,16 +71,29 @@ export default function Login() {
           {errors.email ? (
             <Text style={styles.errorText}>{errors.email}</Text>
           ) : null}
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
+
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              placeholder="Password"
+              secureTextEntry={!passwordVisible}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity
+              onPress={() => setPasswordVisible(!passwordVisible)}
+            >
+              <Ionicons
+                name={passwordVisible ? "eye" : "eye-off"}
+                size={24}
+                color="#4A90E2"
+              />
+            </TouchableOpacity>
+          </View>
           {errors.password ? (
             <Text style={styles.errorText}>{errors.password}</Text>
           ) : null}
+
           <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleSubmit}
@@ -83,6 +105,7 @@ export default function Login() {
               <Text style={styles.buttonText}>Login</Text>
             )}
           </TouchableOpacity>
+
           <View style={styles.footer}>
             <Text style={styles.footerText}>
               Don't have an account?{" "}
@@ -100,7 +123,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F0F7FF",  // Lighter blue background
+    backgroundColor: "#F0F7FF",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -118,7 +141,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    color: "#2E3E5C",  // Deep blue
+    color: "#2E3E5C",
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 24,
@@ -136,8 +159,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#2E3E5C",
   },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    marginBottom: 16,
+  },
   button: {
-    backgroundColor: "#4A90E2",  // Bright blue
+    backgroundColor: "#4A90E2",
     padding: 16,
     borderRadius: 12,
     marginTop: 16,
@@ -165,7 +198,7 @@ const styles = StyleSheet.create({
     borderTopColor: "#E2E8F0",
   },
   footerText: {
-    color: "#64748B",  // Slate
+    color: "#64748B",
     fontSize: 15,
   },
   link: {
@@ -173,7 +206,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   errorText: {
-    color: "#EF4444",  // Red
+    color: "#EF4444",
     marginBottom: 12,
     fontSize: 13,
     marginLeft: 4,

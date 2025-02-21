@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Image, Platform } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import ProfileButton from '../components/ProfileButton';
 
 interface WeatherData {
   temperature: number;
@@ -22,7 +24,8 @@ const NEWS_API_URL = 'https://gnews.io/api/v4/top-headlines?q=Chennai&lang=en&co
 
 const API_TIMEOUT = 10000; // 10 seconds
 
-const CityTab = ({ navigation }: { navigation: NativeStackNavigationProp<any> }) => {
+const CityTab = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,8 +101,16 @@ const CityTab = ({ navigation }: { navigation: NativeStackNavigationProp<any> })
     fetchData();
   }, []);
 
+  const handleProfilePress = () => {
+    navigation.navigate('Profile');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>City Updates</Text>
+        <ProfileButton />
+      </View>
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -183,6 +194,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 16,
+    backgroundColor: "#2874A6",
+    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    marginTop: 20, // Added top margin
+    marginBottom: 12, // Adjusted bottom margin
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "white",
+    textAlign: "center",
+    letterSpacing: 0.5,
+  },
+  profileButton: {
+    padding: 8,
+    borderRadius: 8,
   },
   scrollContent: {
     padding: 16,

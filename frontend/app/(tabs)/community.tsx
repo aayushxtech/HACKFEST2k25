@@ -15,6 +15,17 @@ import {
 } from "react-native";
 import { MotiView } from "moti";
 import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import ProfileButton from '../components/ProfileButton';
+
+type RootStackParamList = {
+  Profile: undefined;
+  Community: undefined;
+  // Add other screens here
+};
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const events = [
   {
@@ -25,7 +36,8 @@ const events = [
     time: "6:00 PM - 9:00 PM, March 15, 2024",
     type: "Networking",
     location: "The Westin Chennai Velachery",
-    imageId: "tech-meetup-1", // Reference to image in the backend
+    imageId: "tech-meetup-1",
+    imageUrl: "https://example.com/images/tech-meetup-1.jpg",
   },
   {
     id: 2,
@@ -35,7 +47,8 @@ const events = [
     time: "10:00 AM - 4:00 PM, March 20, 2024",
     type: "Workshop",
     location: "IIT Madras Research Park",
-    imageId: "ai-workshop-2", // Reference to image in the backend
+    imageId: "ai-workshop-2",
+    imageUrl: "https://example.com/images/ai-workshop-2.jpg",
   },
   {
     id: 3,
@@ -45,9 +58,86 @@ const events = [
     time: "5:00 PM - 8:00 PM, March 25, 2024",
     type: "Pitch Event",
     location: "Chennai Innovation Hub, Taramani",
-    imageId: "startup-pitch-3", // Reference to image in the backend
+    imageId: "startup-pitch-3",
+    imageUrl: "https://example.com/images/startup-pitch-3.jpg",
   },
-  // ...Add 7 more events with similar structure
+  {
+    id: 4,
+    name: "Blockchain Conference",
+    description:
+      "Explore the latest trends and developments in blockchain technology.",
+    time: "9:00 AM - 5:00 PM, April 5, 2024",
+    type: "Conference",
+    location: "Hyatt Regency Chennai",
+    imageId: "blockchain-conference-4",
+    imageUrl: "https://example.com/images/blockchain-conference-4.jpg",
+  },
+  {
+    id: 5,
+    name: "Cybersecurity Summit",
+    description:
+      "Learn about the latest cybersecurity threats and how to protect against them.",
+    time: "10:00 AM - 3:00 PM, April 10, 2024",
+    type: "Summit",
+    location: "Taj Coromandel, Chennai",
+    imageId: "cybersecurity-summit-5",
+    imageUrl: "https://example.com/images/cybersecurity-summit-5.jpg",
+  },
+  {
+    id: 6,
+    name: "Cloud Computing Expo",
+    description:
+      "Discover the future of cloud computing and its impact on businesses.",
+    time: "11:00 AM - 6:00 PM, April 15, 2024",
+    type: "Expo",
+    location: "Chennai Trade Centre",
+    imageId: "cloud-computing-expo-6",
+    imageUrl: "https://example.com/images/cloud-computing-expo-6.jpg",
+  },
+  {
+    id: 7,
+    name: "IoT Hackathon",
+    description:
+      "Participate in a hackathon focused on building innovative IoT solutions.",
+    time: "9:00 AM - 9:00 PM, April 20, 2024",
+    type: "Hackathon",
+    location: "Anna University, Chennai",
+    imageId: "iot-hackathon-7",
+    imageUrl: "https://example.com/images/iot-hackathon-7.jpg",
+  },
+  {
+    id: 8,
+    name: "Data Science Bootcamp",
+    description:
+      "Intensive bootcamp on data science and machine learning techniques.",
+    time: "8:00 AM - 6:00 PM, April 25, 2024",
+    type: "Bootcamp",
+    location: "SRM Institute of Science and Technology",
+    imageId: "data-science-bootcamp-8",
+    imageUrl: "https://example.com/images/data-science-bootcamp-8.jpg",
+  },
+  {
+    id: 9,
+    name: "AR/VR Expo",
+    description:
+      "Experience the latest advancements in augmented and virtual reality.",
+    time: "10:00 AM - 5:00 PM, May 1, 2024",
+    type: "Expo",
+    location: "Phoenix Marketcity, Chennai",
+    imageId: "ar-vr-expo-9",
+    imageUrl: "https://example.com/images/ar-vr-expo-9.jpg",
+  },
+  {
+    id: 10,
+    name: "Fintech Forum",
+    description:
+      "Discuss the future of financial technology with industry leaders.",
+    time: "9:00 AM - 4:00 PM, May 5, 2024",
+    type: "Forum",
+    location: "ITC Grand Chola, Chennai",
+    imageId: "fintech-forum-10",
+    imageUrl: "https://example.com/images/fintech-forum-10.jpg",
+  },
 ];
 
 interface Event {
@@ -62,38 +152,9 @@ interface Event {
 }
 
 const EventCard = ({ event, index }: { event: Event; index: number }) => {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [imageUrl, setImageUrl] = useState<string | null>(event.imageUrl ?? null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadImage = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const url = await imageApi.getEventImage(event.imageId);
-        if (isMounted) {
-          setImageUrl(url);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setError("Failed to load image");
-          console.error("Error loading image:", error);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadImage();
-    return () => {
-      isMounted = false;
-    };
-  }, [event.imageId]);
 
   return (
     <MotiView
@@ -140,6 +201,7 @@ const EventCard = ({ event, index }: { event: Event; index: number }) => {
 };
 
 const HostEventForm = () => {
+  const navigation = useNavigation<NavigationProp>();
   const [eventData, setEventData] = useState({
     eventName: "",
     description: "",
@@ -234,16 +296,16 @@ const HostEventForm = () => {
           />
         )}
       </View>
-
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Host Event</Text>
+        <Text style={styles.submitButtonText}>Submit Event</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-const CommunityPage = () => {
+const CommunityTab = () => {
   const [showHostEvent, setShowHostEvent] = useState(false);
+  const navigation = useNavigation<NavigationProp>();
 
   const toggleHostEvent = () => {
     setShowHostEvent(!showHostEvent);
@@ -251,11 +313,11 @@ const CommunityPage = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Community Events</Text>
+        <ProfileButton />
+      </View>
       <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Community Events</Text>
-        </View>
-
         {showHostEvent ? (
           <HostEventForm />
         ) : (
@@ -264,7 +326,6 @@ const CommunityPage = () => {
           ))
         )}
       </ScrollView>
-
       <TouchableOpacity style={styles.fab} onPress={toggleHostEvent}>
         <Text style={styles.fabText}>{showHostEvent ? "×" : "+"}</Text>
       </TouchableOpacity>
@@ -279,6 +340,9 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "ios" ? 35 : 10, // Reduced top padding
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 15,
     paddingHorizontal: 16,
     backgroundColor: "#2874A6",
@@ -304,6 +368,15 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     letterSpacing: 0.5, // Added letter spacing
+  },
+  profileButton: {
+    backgroundColor: "#fff",
+    padding: 8,
+    borderRadius: 8,
+  },
+  profileButtonText: {
+    color: "#2874A6",
+    fontWeight: "bold",
   },
   scrollView: {
     padding: 12, // Changed from 15
@@ -497,4 +570,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CommunityPage;
+export default CommunityTab;

@@ -9,8 +9,8 @@ import {
   Dimensions,
   Platform,
 } from "react-native";
-import { Stack, router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Stack } from "expo-router";
+import ProfileButton from "../components/ProfileButton";
 
 interface DonationCard {
   id: string;
@@ -98,11 +98,8 @@ const DonationScreen = () => {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Text numberOfLines={1} style={styles.headerTitle}>
-            Donations
-          </Text>
-        </View>
+        <Text style={styles.headerTitle}>Donations</Text>
+        <ProfileButton />
       </View>
 
       {/* Filter Section */}
@@ -203,6 +200,9 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 35 : 10, // Updated to match community
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 15,
     paddingHorizontal: 16,
     backgroundColor: "#2874A6",
@@ -221,10 +221,6 @@ const styles = StyleSheet.create({
         elevation: 3,
       },
     }),
-  },
-  headerContent: {
-    alignItems: "center",
-    justifyContent: "center",
   },
   headerTitle: {
     fontSize: 24,

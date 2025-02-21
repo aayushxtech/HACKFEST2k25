@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { auth } from "../firebaseConfig";
 import {
   View,
   Text,
@@ -8,9 +9,11 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Stack } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 
 interface UserDetails {
   name: string;
@@ -44,19 +47,83 @@ const getScoreColor = (score: number): string => {
 };
 
 const ProfileScreen = () => {
+  const db = getFirestore();
   const [isEditing, setIsEditing] = useState(false);
   const [userDetails, setUserDetails] = useState<UserDetails>({
-    name: "Mahesh Babu",
-    email: "mahesh@gmail.com",
+    name: "",
+    email: "",
     bio: "Software Developer | Event Enthusiast",
-    profilePicture: "https://via.placeholder.com/150", // Fixed URL
+    profilePicture: "https://placehold.co/150x150/e2e8f0/1a1b1e.png",
   });
+
+  // Add new state for local image URI
+  const [localImageUri, setLocalImageUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUserDetails({
+              name: userData.name || currentUser.displayName || "User",
+              email: userData.email || currentUser.email || "",
+              bio: userData.bio || "Software Developer | Event Enthusiast",
+              profilePicture:
+                userData.profilePicture ||
+                "https://placehold.co/150x150/e2e8f0/1a1b1e.png",
+            });
+            // Set local image if exists
+            if (userData.profilePicture) {
+              setLocalImageUri(userData.profilePicture);
+            }
+          }
+        } catch (error) {
+          console.error("Error loading user data:", error);
+        }
+      }
+    };
+
+    loadUserData();
+  }, []);
+
+  // Listen for auth state changes
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUserDetails((prev) => ({
+          ...prev,
+          name: user.displayName || "User",
+          email: user.email || "",
+        }));
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const [editableDetails, setEditableDetails] = useState({ ...userDetails });
 
-  const handleSave = () => {
-    setUserDetails(editableDetails);
-    setIsEditing(false);
+  const handleSave = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    try {
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        name: editableDetails.name,
+        bio: editableDetails.bio,
+        email: editableDetails.email,
+      });
+
+      setUserDetails(editableDetails);
+      setIsEditing(false);
+      Alert.alert("Success", "Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      Alert.alert("Error", "Failed to update profile");
+    }
   };
 
   const [joinedEvents] = useState<Event[]>([
@@ -89,7 +156,10 @@ const ProfileScreen = () => {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        alert("Sorry, we need camera roll permissions to make this work!");
+        Alert.alert(
+          "Permission needed",
+          "Please grant camera roll permissions"
+        );
         return;
       }
 
@@ -97,18 +167,37 @@ const ProfileScreen = () => {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1,
+        quality: 0.5,
       });
 
       if (!result.canceled && result.assets[0]) {
-        setUserDetails({
-          ...userDetails,
-          profilePicture: result.assets[0].uri,
-        });
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+
+        try {
+          // Set local image URI immediately for instant feedback
+          setLocalImageUri(result.assets[0].uri);
+
+          // Update Firestore
+          await updateDoc(doc(db, "users", currentUser.uid), {
+            profilePicture: result.assets[0].uri,
+          });
+
+          // Update user details
+          setUserDetails((prev) => ({
+            ...prev,
+            profilePicture: result.assets[0].uri,
+          }));
+        } catch (error) {
+          console.error("Error updating profile picture:", error);
+          Alert.alert("Error", "Failed to update profile picture");
+          // Revert local image on error
+          setLocalImageUri(null);
+        }
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      alert("Failed to pick image");
+      Alert.alert("Error", "Failed to pick image");
     }
   };
 
@@ -124,7 +213,7 @@ const ProfileScreen = () => {
           <TouchableOpacity onPress={pickImage}>
             <View style={styles.imageWrapper}>
               <Image
-                source={{ uri: userDetails.profilePicture }}
+                source={{ uri: localImageUri || userDetails.profilePicture }}
                 style={styles.profilePicture}
               />
               <View style={styles.editIconOverlay}>

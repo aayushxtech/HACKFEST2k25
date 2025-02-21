@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { Stack } from "expo-router";
+import "../firebaseConfig"; // Import firebase config first
 import { AuthProvider } from "../context/AuthContext";
 
 export default function RootLayout() {

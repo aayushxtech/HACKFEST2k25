@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /events/{eventId} {
+      allow read: if true;  // Allow anyone to read events
+      allow write: if true; // Allow anyone to write events (you might want to restrict this in production)
+    }
+  }
+}

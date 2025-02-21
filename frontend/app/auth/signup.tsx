@@ -124,6 +124,7 @@ export default function SignUp() {
       );
     } catch (error) {
       console.error("Signup error:", error);
+
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create account";
       // Clear loading state before showing error

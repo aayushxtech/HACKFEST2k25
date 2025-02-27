@@ -10,12 +10,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Link, router } from "expo-router";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig"; // Import db directly from firebaseConfig
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, addDoc } from "firebase/firestore"; // Import all needed Firestore methods
 
 export default function SignUp() {
-  const db = getFirestore();
+  // Remove the local db initialization since we're importing it
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -84,6 +84,8 @@ export default function SignUp() {
 
     setIsLoading(true);
     try {
+      console.log("Starting user creation process...");
+
       // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -91,21 +93,98 @@ export default function SignUp() {
         formData.password
       );
 
+      const user = userCredential.user;
+      console.log("Auth user created:", user.uid);
+
       // Update user profile
-      await updateProfile(userCredential.user, {
+      await updateProfile(user, {
         displayName: formData.name,
       });
+      console.log("User profile updated");
 
-      // Store additional user data in Firestore
-      await setDoc(doc(db, "users", userCredential.user.uid), {
+      // Prepare user data for Firestore
+      const userData = {
+        uid: user.uid,
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         userType: userType,
-        ngoRegistrationNumber:
-          userType === "NGO" ? formData.ngoRegistrationNumber : null,
+        profileComplete: false,
+        emailVerified: user.emailVerified,
         createdAt: new Date().toISOString(),
-      });
+        lastLogin: new Date().toISOString(),
+        ...(userType === "NGO" && {
+          ngoRegistrationNumber: formData.ngoRegistrationNumber,
+          ngoVerified: false,
+        }),
+      };
+
+      console.log("User data prepared:", userData);
+
+      try {
+        // Explicitly ensure collections exist by using alternative approach
+        // Method 1: Using setDoc with explicit document ID (more reliable)
+        console.log("Writing to users collection...");
+        await setDoc(doc(db, "users", user.uid), userData);
+        console.log("Successfully wrote to users collection");
+
+        // Create type-specific data
+        const collectionName = userType.toLowerCase() + "s"; // 'users' or 'ngos'
+        const typeSpecificData = {
+          ...userData,
+          ...(userType === "NGO"
+            ? {
+                causes: [],
+                address: "",
+                description: "",
+                website: "",
+                socialLinks: {},
+              }
+            : {
+                preferences: [],
+                donations: [],
+                savedEvents: [],
+              }),
+        };
+
+        // Method 2: Using addDoc to the specific collection as a fallback
+        if (collectionName !== "users") {
+          // Avoid duplicate for users
+          console.log(`Writing to ${collectionName} collection...`);
+          // Two approaches - try both if needed
+
+          // Approach 1: setDoc with explicit ID
+          await setDoc(doc(db, collectionName, user.uid), typeSpecificData);
+
+          // Approach 2: addDoc (auto-generates ID, creates collection if not exists)
+          // Uncomment if Approach 1 doesn't work
+          // const docRef = await addDoc(collection(db, collectionName), typeSpecificData);
+          // console.log(`Document written with auto-ID: ${docRef.id}`);
+
+          console.log(`Successfully wrote to ${collectionName} collection`);
+        }
+
+        // Test collection creation removed
+      } catch (dbError) {
+        console.error("Firestore write error:", dbError);
+
+        // Try a different approach using addDoc instead of setDoc
+        try {
+          console.log("Trying alternative method with addDoc...");
+          const docRef = await addDoc(collection(db, "users_backup"), userData);
+          console.log("Successfully wrote to backup collection:", docRef.id);
+        } catch (fallbackError) {
+          console.error("Fallback error:", fallbackError);
+        }
+
+        throw new Error(
+          `Database write failed: ${
+            dbError instanceof Error ? dbError.message : "Unknown error"
+          }`
+        );
+      }
+
+      console.log(`User created and added to database: ${user.uid}`);
 
       // Clear loading state immediately after operations are complete
       setIsLoading(false);

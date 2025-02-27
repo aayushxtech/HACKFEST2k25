@@ -11,9 +11,10 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { signOut } from "firebase/auth";
 
 interface UserDetails {
   name: string;
@@ -203,6 +204,17 @@ const ProfileScreen = () => {
 
   const [isImageLoading, setIsImageLoading] = useState(true);
 
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      Alert.alert("Success", "You have been signed out");
+      router.replace("/auth/login");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      Alert.alert("Error", "Failed to sign out");
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <Stack.Screen options={{ title: "Profile" }} />
@@ -354,6 +366,11 @@ const ProfileScreen = () => {
       {/* Inbox Button */}
       <TouchableOpacity style={styles.inboxButton}>
         <Text style={styles.inboxButtonText}>Inbox</Text>
+      </TouchableOpacity>
+
+      {/* Sign Out Button */}
+      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+        <Text style={styles.signOutButtonText}>Sign Out</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -594,6 +611,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginBottom: 4,
+  },
+  signOutButton: {
+    margin: 20,
+    marginTop: 10,
+    padding: 15,
+    backgroundColor: "#FF3B30",
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  signOutButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
